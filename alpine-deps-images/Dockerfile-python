@@ -1,4 +1,4 @@
-FROM nerevarishe/python-alpine-image:latest
+FROM nerevarishe/python-alpine:latest
 WORKDIR /root
 COPY ../backend/requirements.txt ./
 RUN pip install --no-cache-dir -U pip wheel setuptools \
