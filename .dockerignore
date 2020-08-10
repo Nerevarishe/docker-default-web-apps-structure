@@ -1,0 +1,9 @@
+./backend/venv
+./frontend/node_modules
+./backend/.idea
+./backend/.vscode
+./frontend/.idea
+./frontend/.vscode
+.env
+.git
+.gitignore

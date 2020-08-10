@@ -1,48 +1,67 @@
 version: "3.8"
 services:
   db:
-    image: nerevarishe/db:latest
+    image: $DB_IMAGE
     environment:
-      SOME_VARIABLES: "some_variables"
+      # MongoDB image env:
+      - MONGO_INITDB_ROOT_USERNAME=$DB_ROOT_USER
+      - MONGO_INITDB_ROOT_PASSWORD=$DB_ROOT_PASSWORD
+      - MONGO_INITDB_DATABASE=$DB_NAME
+      # Python MongoEngine library env:
+      - MONGODB_USERNAME=$DB_USER
+      - MONGODB_PASSWORD=$DB_PASSWORD
+      - MONGODB_DB=$DB_NAME
     volumes:
-      - some_volume:/path
+      - ./scripts/mongodb:/docker-entrypoint-initdb.d:ro
+      - mongo-db-data:/data/db
     networks:
       - back
-    restart: always
+    restart: unless-stopped
   
   backend:
-    image: nerevarishe/backend:latest
+    image: $BACKEND_IMAGE
     environment:
-      SOME_VARIABLES: "some_variables"
-    volumes:
-      - upload_dir:/path
+      # Python MongoEngine library env:
+      - MONGODB_HOST=$DB_HOST
+      - MONGODB_PORT=$DB_PORT
+      - MONGODB_USERNAME=$DB_USER
+      - MONGODB_PASSWORD=$DB_PASSWORD
+      - MONGODB_DB=$DB_NAME
     networks:
       - back
       - front
-    restart: always
+    restart: unless-stopped
     depends_on:
       - db
       
-    frontend:
-      image: nerevarishe/frontend:latest
-    environment:
-      SOME_VARIABLES: "some_variables"
+  frontend:
+    image: $FRONTEND_IMAGE
+    ports:
+      - 80:80
     networks:
       - front
-    restart: always
+    restart: unless-stopped
     depends_on:
       - db
       - backend
       
-    cron:
-      image: nerevarishe/cron:latest
-    environment:
-      SOME_VARIABLES: "some_variables"
-    networks:
-      - back
-      - front
-    restart: always
-    depends_on:
-      - db
-      - backend
-      - frontend
+  #cron:
+  #  image: $CRON_IMAGE
+  #environment:
+  #  SOME_VARIABLES: "some_variables"
+  #networks:
+  #  - back
+  #  - front
+  #restart: unless-stopped
+  #depends_on:
+  #  - db
+  #  - backend
+  #  - frontend
+
+volumes:
+  mongo-db-data:
+    name: $DB_NAME
+
+networks:
+  back:
+  front:
